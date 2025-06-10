@@ -9,13 +9,24 @@ So lets fix this:
 
 1. Launch Automator
 2. Create a New "Application" document
-3. Add a "Run Shell Script" action
-4. Enter this instructions on that action:
-``` shell
-for f in "$@"
-do
-	open -n -b "com.toonboom.harmony.full.Harmony22Premium" --args "$f"
-done
+3. Add a "Run AppleScript" action
+4. Replace the default code with this AppleScript:
+``` applescript
+on run input
+	if input is not {} then
+		repeat with f in input
+			try
+				set filePath to POSIX path of (f as alias)
+				do shell script "open -n -b \"com.toonboom.harmony.full.Harmony22Premium\" --args " & quoted form of filePath
+			on error
+				-- Handle files that might be passed as strings
+				try
+					do shell script "open -n -b \"com.toonboom.harmony.full.Harmony22Premium\" --args " & quoted form of (f as string)
+				end try
+			end try
+		end repeat
+	end if
+end run
 ```
 5. You can modify the `"Harmony22Premium"` string to fit the version you have installed.
 6. Save this in your Applications folder. I saved this as `"Toonboom Harmony Multi-Instance.app"`
